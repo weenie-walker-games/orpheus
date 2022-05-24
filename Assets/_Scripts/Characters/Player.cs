@@ -4,9 +4,14 @@ using UnityEngine;
 
 namespace WeenieWalker
 {
-    public class Player : MovingObject, IHealth
+    public class Player : MonoBehaviour, IHealth
     {
         [SerializeField] float restartLevelDelay = 1f;
+        [SerializeField] float moveSpeed = 1f;
+        float moveLimiter = 0.7f;
+        float horizontal = 0;
+        float vertical = 0;
+        Rigidbody rb;
 
         [SerializeField] GameObject notesSystem;
         [SerializeField] int enemyDamage = 1;
@@ -32,40 +37,38 @@ namespace WeenieWalker
             GameManager.OnStartGame -= Restart;
         }
 
-        protected override void Start()
+        private void Start()
         {
-            base.Start();
-
+            rb = GetComponent<Rigidbody>();
             notes = notesSystem.GetComponent<ParticleSystem>();
 
         }
 
         protected void Update()
         {
-            if (!GameManager.Instance.playersTurn) return;
-
-            Debug.Log("Player is moving");
-
-            int horizontal = 0;
-            int vertical = 0;
-
-            horizontal = (int)Input.GetAxisRaw("Horizontal");
-            vertical = (int)Input.GetAxis("Vertical");
-
-            if (horizontal != 0)
-                vertical = 0;
-
-            if (horizontal != 0 || vertical != 0)
-                AttemptMove<Enemy>(horizontal, vertical);
+            
+            horizontal = Input.GetAxisRaw("Horizontal");
+            vertical = Input.GetAxis("Vertical");
 
 
-            ////Check if firing music
-            //if (Input.GetAxis("Fire1") > 0.01f && canFire)
-            //{
-            //    if (fireRoutine != null) StopCoroutine(fireRoutine);
+            //Check if firing music
+            if (Input.GetAxis("Fire1") > 0.01f && canFire)
+            {
+                if (fireRoutine != null) StopCoroutine(fireRoutine);
 
-            //    fireRoutine = StartCoroutine(Firing());
-            //}
+                fireRoutine = StartCoroutine(Firing());
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if(horizontal != 0 && vertical != 0)
+            {
+                horizontal *= moveLimiter;
+                vertical *= moveLimiter;
+            }
+
+            rb.velocity = new Vector3(horizontal * moveSpeed, transform.position.y, vertical * moveSpeed);   
         }
 
         IEnumerator Firing()
@@ -84,27 +87,10 @@ namespace WeenieWalker
             canFire = true;
         }
 
-
-        protected override void AttemptMove<T>(int xDir, int yDir)
-        {
-            base.AttemptMove<T>(xDir, yDir);
-
-            RaycastHit2D hit;
-
-            if(Move (xDir, yDir, out hit))
-            {
-
-            }
-
-            CheckIfGameOver();
-
-            GameManager.Instance.playersTurn = false;
-        }
-
-        protected override void OnCantMove<T>(T component)
-        {
-            Enemy hitEnemy = component as Enemy;
-            hitEnemy.TakeDamage(enemyDamage);
+        private void FireWeapon()
+        { 
+            //Enemy hitEnemy = component as Enemy;
+            //hitEnemy.TakeDamage(enemyDamage);
             notes.Play();
         }
 
