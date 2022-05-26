@@ -28,18 +28,24 @@ namespace WeenieWalker
 
 
         Coroutine fireRoutine;
+        bool isPlayerPaused = true;
+        bool isReversed = false;
 
 
         private void OnEnable()
         {
             GameManager.OnStartGame += Restart;
             GameManager.OnStartLevel += StartNewLevel;
+            GameManager.OnPauseGame += PauseGame;
+            GameManager.OnGameReverse += Reversed;
         }
 
         private void OnDisable()
         {
             GameManager.OnStartGame -= Restart;
             GameManager.OnStartLevel -= StartNewLevel;
+            GameManager.OnPauseGame -= PauseGame;
+            GameManager.OnGameReverse -= Reversed;
         }
 
         private void Start()
@@ -51,10 +57,25 @@ namespace WeenieWalker
 
         protected void Update()
         {
-            
+
+            if (isPlayerPaused)
+                return;
+
+            //check if player hit "P" key to pause the game
+            if (Input.GetKeyDown(KeyCode.P))
+                GameManager.Instance.PauseGame(!isPlayerPaused);
+
+
+
             horizontal = Input.GetAxisRaw("Horizontal");
             vertical = Input.GetAxis("Vertical");
 
+
+            if (isReversed)
+            {
+                horizontal = Mathf.Clamp(horizontal, -1f, 0f);
+                vertical = Mathf.Clamp(vertical, -1f, 0f);
+            }
 
             //Check if firing music
             if (Input.GetAxis("Fire1") > 0.01f && canFire)
@@ -67,6 +88,13 @@ namespace WeenieWalker
 
         private void FixedUpdate()
         {
+            if (isPlayerPaused)
+            {
+                horizontal = 0;
+                vertical = 0;
+            }
+
+
             if(horizontal != 0 && vertical != 0)
             {
                 horizontal *= moveLimiter;
@@ -137,5 +165,14 @@ namespace WeenieWalker
             transform.position = newLocation;
         }
         
+        private void PauseGame(bool isPaused, bool toShowMenu)
+        {
+            isPlayerPaused = isPaused;
+        }
+
+        private void Reversed()
+        {
+            isReversed = true;
+        }
     }
 }

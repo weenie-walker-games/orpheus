@@ -9,27 +9,13 @@ namespace WeenieWalker
 
         [SerializeField] Renderer lavaRenderer;
         [SerializeField] int materialNumber = 0;
-        [SerializeField] float scrollSpeed = 5.0f;
+        [SerializeField] float scrollSpeed = 0.1f;
         Vector2 v2Offset = Vector2.zero;
-   
 
-        private void OnEnable()
-        {
-            
-        }
-
-        private void OnDisable()
-        {
-            
-        }
-
-        private void Start()
-        {
-
-        }
 
         private void LateUpdate()
         {
+
             float offset = Time.time * scrollSpeed;
             v2Offset.x = offset;
 

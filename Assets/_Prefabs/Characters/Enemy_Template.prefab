@@ -206,6 +206,9 @@ MonoBehaviour:
   agent: {fileID: 3239578218317047816}
   distanceCatchTarget: 0.75
   weaponDelay: 1
+  clips:
+  - {fileID: 8300000, guid: 5ca8f6b18abf41d4695819d9e5c04f5a, type: 3}
+  - {fileID: 8300000, guid: 74be90ba2c1bee444996911fbfc4b6c7, type: 3}
   maxHealth: 100
 --- !u!82 &8467954589688546503
 AudioSource:
@@ -217,9 +220,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 5ca8f6b18abf41d4695819d9e5c04f5a, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.395
   m_Pitch: 1
   Loop: 0
   Mute: 0

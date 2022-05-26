@@ -17,6 +17,7 @@ namespace WeenieWalker
         Player playerTarget;
         [SerializeField] float distanceCatchTarget = 0.75f;
         [SerializeField] float weaponDelay = 0.5f;
+        [SerializeField] AudioClip[] clips = new AudioClip[2];
 
 
         [SerializeField] private int maxHealth = 100;
@@ -26,20 +27,25 @@ namespace WeenieWalker
         bool isChasingTarget = false;
         Coroutine chaseRoutine;
         Vector3 startLocation;
+        Vector3 currentTargetDestination;
+        bool isGamePaused = true;
 
         private void OnEnable()
         {
             GameManager.OnStartGame += Restart;
+            GameManager.OnPauseGame += PauseGame;
         }
 
         private void OnDisable()
         {
             GameManager.OnStartGame -= Restart;
+            GameManager.OnPauseGame -= PauseGame;
         }
 
         private void Start()
         {
             startLocation = transform.position;
+            currentTargetDestination = startLocation;
         }
 
         public void TargetEntered(Player player)
@@ -48,8 +54,8 @@ namespace WeenieWalker
 
             isChasingTarget = true;
 
-            agent.SetDestination(playerTarget.transform.position);
-            agent.isStopped = false;
+            currentTargetDestination = playerTarget.transform.position;
+
 
             if (chaseRoutine != null) StopCoroutine(chaseRoutine);
             chaseRoutine = StartCoroutine(ChaseTarget());
@@ -59,6 +65,7 @@ namespace WeenieWalker
         public void TargetExited()
         {
             isChasingTarget = false;
+            currentTargetDestination = startLocation;
             agent.SetDestination(startLocation);
         }
 
@@ -68,27 +75,39 @@ namespace WeenieWalker
 
             while (isChasingTarget)
             {
-                agent.SetDestination(playerTarget.transform.position);
-
-                if ((transform.position - playerTarget.transform.position).sqrMagnitude < distanceCatchTarget)
+                if (isGamePaused)
                 {
                     agent.isStopped = true;
-
-                    if (Time.time >= readyToFireTime)
-                    {
-                        //Attack target
-                        attackSystem.Play();
-                        playerTarget.TakeDamage(playerDamage);
-
-                        readyToFireTime = Time.time + weaponDelay;
-                    }
+                    yield return null;
                 }
                 else
                 {
-                    agent.isStopped = false;
-                }
 
-                yield return null;
+                    agent.SetDestination(playerTarget.transform.position);
+                    agent.isStopped = false;
+
+                    if ((transform.position - playerTarget.transform.position).sqrMagnitude < distanceCatchTarget)
+                    {
+                        agent.isStopped = true;
+
+                        if (Time.time >= readyToFireTime)
+                        {
+                            //Attack target
+                            attackSystem.Play();
+                            audioSource.clip = clips[0];
+                            audioSource.Play();
+                            playerTarget.TakeDamage(playerDamage);
+
+                            readyToFireTime = Time.time + weaponDelay;
+                        }
+                    }
+                    else
+                    {
+                        agent.isStopped = false;
+                    }
+
+                    yield return null;
+                }
             }
         }
 
@@ -102,6 +121,7 @@ namespace WeenieWalker
                 IsAlive = false;
                 TargetExited();
                 deathSystem.Play();
+                audioSource.clip = clips[1];
                 audioSource.Play();
                 Invoke("DisableEnemy", 1f);
             }
@@ -117,5 +137,19 @@ namespace WeenieWalker
             CurrentHealth = maxHealth;
         }
 
+        private void PauseGame(bool isPaused, bool toShowMenu)
+        {
+            //Only communicate with agent if currently chasing target or it is returning to starting location
+            //if (isChasingTarget || agent.destination == startLocation)
+
+            isGamePaused = isPaused;
+
+            if (isPaused)
+                agent.SetDestination(transform.position);
+            else
+                agent.SetDestination(currentTargetDestination);
+
+            agent.isStopped = isPaused;
+        }
     }
 }

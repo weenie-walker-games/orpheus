@@ -8,16 +8,20 @@ namespace WeenieWalker
     public class GameManager : MonoSingleton<GameManager>
     {
         public static event System.Action OnStartGame;
-        public static event System.Action<bool> OnPauseGame;
+        public static event System.Action<bool, bool> OnPauseGame;
         public static event System.Action<Vector3> OnStartLevel;
         public static event System.Action OnEndLevel;
         public static event System.Action OnGameReverse;
+        public static event System.Action<bool> OnGameFadingToBlack;
+        public static event System.Action<int> OnShowLevel;
+        public static event System.Action OnWinGame;
 
         [SerializeField] float levelDelay = 0.25f;
 
         [SerializeField] int numLevels = 8;
         [SerializeField] int level = 0;
         bool isPlayingInReverse = false;
+        Coroutine levelCompleteRoutine;
 
         [SerializeField] List<LevelDoorData> doorData = new List<LevelDoorData>();
 
@@ -33,7 +37,7 @@ namespace WeenieWalker
 
         private void Start()
         {
-            StartGame();
+
         }
 
         public void GameOver()
@@ -41,19 +45,42 @@ namespace WeenieWalker
             this.enabled = false;
         }
 
-        private void StartGame()
+        public void StartGame(int numberOfLevels)
         {
+            numLevels = numberOfLevels;
 
-            OnStartLevel?.Invoke(doorData[level].enterDoor.transform.position);
-            OnStartGame?.Invoke();
+            StartCoroutine(StartingGame());
         }
 
-        public void PauseGame(bool toPause)
+        public IEnumerator StartingGame()
         {
-            OnPauseGame?.Invoke(toPause);
+            yield return new WaitForSeconds(0.5f);
+            OnShowLevel?.Invoke(level + 1);
+            yield return new WaitForSeconds(2.5f);
+            OnStartLevel?.Invoke(doorData[level].enterDoor.transform.position);
+            PauseGame(false);
+            OnGameFadingToBlack?.Invoke(false);
+            OnStartGame?.Invoke();
+
+        }
+
+        public void PauseButtonPressed()
+        {
+            PauseGame(false);
+        }
+
+        public void PauseGame(bool toPause, bool toShowMenu = true)
+        {
+            OnPauseGame?.Invoke(toPause, toShowMenu);
         }
 
         public void LevelCompleted()
+        {
+            if (levelCompleteRoutine != null) StopCoroutine(levelCompleteRoutine);
+            levelCompleteRoutine = StartCoroutine(CompleteLevelRoutine());
+        }
+
+        IEnumerator CompleteLevelRoutine()
         {
             Debug.Log("Level complete " + level);
 
@@ -61,14 +88,16 @@ namespace WeenieWalker
 
 
             //Pause the game
-            PauseGame(true);
+            PauseGame(true, false);
 
             //fade to black
+            OnGameFadingToBlack?.Invoke(false);
+
 
             if (level == 0 && isPlayingInReverse)
             {
                 WinGame();
-                return;
+                yield break;
             }
 
             //increment level
@@ -78,6 +107,7 @@ namespace WeenieWalker
                 //Restart final level with player at final door
                 isPlayingInReverse = true;
                 OnGameReverse?.Invoke();
+                yield break;
             }
             else
             {
@@ -88,6 +118,12 @@ namespace WeenieWalker
                 Debug.Log("Level is " + level);
             }
 
+            //Show the level to the player, adding one to not show 0-based numbering
+            OnShowLevel?.Invoke(level + 1);
+            yield return new WaitForSeconds(1.5f);
+
+
+
             //move character
             Vector3 newLocation;
             if (isPlayingInReverse)
@@ -97,6 +133,8 @@ namespace WeenieWalker
             OnStartLevel?.Invoke(newLocation);
 
             //fade in
+            OnGameFadingToBlack?.Invoke(false);
+            yield return new WaitForSeconds(1f);
 
             //unpause game
             PauseGame(false);
@@ -104,7 +142,27 @@ namespace WeenieWalker
 
         private void WinGame()
         {
-            Debug.Log("You win!");
+            if(levelCompleteRoutine != null)
+                StopCoroutine(levelCompleteRoutine);
+
+            OnWinGame?.Invoke();
+        }
+
+        public void EndCutscene()
+        {
+            OnShowLevel?.Invoke(level + 1);
+
+            //move character
+            Vector3 newLocation;
+            newLocation = doorData[level].exitDoor.transform.position;
+
+
+            //fade in
+            OnGameFadingToBlack?.Invoke(false);
+
+
+            //unpause game
+            PauseGame(false);
         }
 
     }
