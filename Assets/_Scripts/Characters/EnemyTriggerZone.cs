@@ -15,12 +15,12 @@ namespace WeenieWalker
 
         private void OnEnable()
         {
-            
+            GameManager.OnEndLevel += PlayerExited;
         }
 
         private void OnDisable()
         {
-            
+            GameManager.OnEndLevel -= PlayerExited;
         }
 
         private void Start()
@@ -36,15 +36,28 @@ namespace WeenieWalker
         {
             if (other.gameObject.CompareTag("Player"))
             {
-                Debug.Log("Player triggered");
-                
-                playerTarget = other.GetComponent<Player>();
+
+                playerTarget = other.GetComponentInParent<Player>();
 
                 if (playerTarget != null)
                 {
                     //Tell enemies to attack
+                    enemiesInZone.ForEach(e => { if (e.IsAlive) e.TargetEntered(playerTarget); });
                 }
             }
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.gameObject.CompareTag("Player"))
+            {
+                PlayerExited();
+            }
+        }
+
+        private void PlayerExited()
+        {
+            enemiesInZone.ForEach(e => { if (e.IsAlive) e.TargetExited(); });
         }
     }
 }

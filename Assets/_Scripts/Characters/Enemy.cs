@@ -8,12 +8,11 @@ namespace WeenieWalker
     public class Enemy : MonoBehaviour, IHealth
     {
 
-        [SerializeField] int enemyLevel;
-        bool isAlive = true;
+        public bool IsAlive { get; private set; } = true;
         [SerializeField] int playerDamage = 5;
-        [SerializeField] bool isSeeking = false;
         [SerializeField] ParticleSystem attackSystem;
         [SerializeField] ParticleSystem deathSystem;
+        [SerializeField] AudioSource audioSource;
         [SerializeField] NavMeshAgent agent;
         Player playerTarget;
         [SerializeField] float distanceCatchTarget = 0.75f;
@@ -24,8 +23,9 @@ namespace WeenieWalker
         public int MaxHealth { get { return maxHealth; } }
         public int CurrentHealth { get; private set; }
 
-        bool hasCaughtTarget = false;
         bool isChasingTarget = false;
+        Coroutine chaseRoutine;
+        Vector3 startLocation;
 
         private void OnEnable()
         {
@@ -39,30 +39,28 @@ namespace WeenieWalker
 
         private void Start()
         {
-
+            startLocation = transform.position;
         }
 
-        private void OnTriggerEnter(Collider other)
+        public void TargetEntered(Player player)
         {
+            playerTarget = player;
 
-            if (other.gameObject.CompareTag("Player"))
-            {
-                Debug.Log("Player triggered");
-                hasCaughtTarget = false;
-                isChasingTarget = true;
-                playerTarget = other.GetComponent<Player>();
+            isChasingTarget = true;
 
-                if (playerTarget != null)
-                {
-                    agent.SetDestination(playerTarget.transform.position);
-                    agent.isStopped = false;
+            agent.SetDestination(playerTarget.transform.position);
+            agent.isStopped = false;
 
-                    StartCoroutine(ChaseTarget());
-                }
-            }
+            if (chaseRoutine != null) StopCoroutine(chaseRoutine);
+            chaseRoutine = StartCoroutine(ChaseTarget());
+
         }
 
-
+        public void TargetExited()
+        {
+            isChasingTarget = false;
+            agent.SetDestination(startLocation);
+        }
 
         IEnumerator ChaseTarget()
         {
@@ -74,7 +72,6 @@ namespace WeenieWalker
 
                 if ((transform.position - playerTarget.transform.position).sqrMagnitude < distanceCatchTarget)
                 {
-                    hasCaughtTarget = true;
                     agent.isStopped = true;
 
                     if (Time.time >= readyToFireTime)
@@ -88,7 +85,6 @@ namespace WeenieWalker
                 }
                 else
                 {
-                    hasCaughtTarget = false;
                     agent.isStopped = false;
                 }
 
@@ -98,13 +94,15 @@ namespace WeenieWalker
 
         public void TakeDamage(int loss)
         {
+
             CurrentHealth -= loss;
             
-
             if(CurrentHealth <= 0)
             {
+                IsAlive = false;
+                TargetExited();
                 deathSystem.Play();
-                isAlive = false;
+                audioSource.Play();
                 Invoke("DisableEnemy", 1f);
             }
         }

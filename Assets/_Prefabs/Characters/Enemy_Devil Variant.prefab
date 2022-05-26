@@ -7,25 +7,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 527569860297859640, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 9530a26fffecc5045b36eba42a54a398, type: 2}
+    - target: {fileID: 886780704992913709, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: playerDamage
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
       propertyPath: m_RootOrder
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
@@ -35,7 +30,7 @@ PrefabInstance:
     - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
@@ -77,11 +72,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
-        type: 3}
-      propertyPath: m_ConstrainProportionsScale
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1086620535826834119, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -91,6 +81,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Enemy_Devil Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 5373204179558378569, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5373204179558378569, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5373204179558378569, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 33dd81a921a70dc42b47c62af443d24f, type: 3}

@@ -14,8 +14,11 @@ namespace WeenieWalker
         Rigidbody rb;
 
         [SerializeField] GameObject notesSystem;
-        [SerializeField] int enemyDamage = 1;
+        [SerializeField] AudioSource audioSource;
+        [SerializeField] int enemyDamage = 25;
+        [SerializeField] float weaponDamageDistance = 1.5f;
         [SerializeField] float weaponDelay = 0.3f;
+        [SerializeField] LayerMask enemyLayer;
         bool canFire = true;
         ParticleSystem notes;
 
@@ -30,11 +33,13 @@ namespace WeenieWalker
         private void OnEnable()
         {
             GameManager.OnStartGame += Restart;
+            GameManager.OnStartLevel += StartNewLevel;
         }
 
         private void OnDisable()
         {
             GameManager.OnStartGame -= Restart;
+            GameManager.OnStartLevel -= StartNewLevel;
         }
 
         private void Start()
@@ -75,10 +80,11 @@ namespace WeenieWalker
         {
             canFire = false;
 
-            notes.Play();
+            FireWeapon();
 
+            //Reset the timer
             float newTime = Time.time + weaponDelay;
-
+            //Delay for cooldown
             while(Time.time < newTime)
             {
                 yield return null;
@@ -88,10 +94,22 @@ namespace WeenieWalker
         }
 
         private void FireWeapon()
-        { 
-            //Enemy hitEnemy = component as Enemy;
-            //hitEnemy.TakeDamage(enemyDamage);
+        {
+            Enemy hitEnemy;
+            int maxColliders = 10;
+            Collider[] hitColliders = new Collider[maxColliders];
+            int numColliders = Physics.OverlapSphereNonAlloc(transform.position, weaponDamageDistance, hitColliders, enemyLayer);
+
+            for (int i = 0; i < numColliders; i++)
+            {
+                hitEnemy = null;
+
+                if (hitColliders[i].TryGetComponent(out hitEnemy))
+                    hitEnemy.TakeDamage(enemyDamage);
+            }
+
             notes.Play();
+            audioSource.Play();
         }
 
         public void TakeDamage(int loss)
@@ -112,6 +130,11 @@ namespace WeenieWalker
             {
                 GameManager.Instance.GameOver();
             }
+        }
+
+        private void StartNewLevel(Vector3 newLocation)
+        {
+            transform.position = newLocation;
         }
         
     }
