@@ -17,6 +17,11 @@ PrefabInstance:
       propertyPath: playerDamage
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 1086620535826834114, guid: 33dd81a921a70dc42b47c62af443d24f,
+        type: 3}
+      propertyPath: m_Speed
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1086620535826834115, guid: 33dd81a921a70dc42b47c62af443d24f,
         type: 3}
       propertyPath: m_RootOrder

@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   restartLevelDelay: 1
-  moveSpeed: 1
+  moveSpeed: 3
   notesSystem: {fileID: 6924233195303594519}
   audioSource: {fileID: 8198806973694999073}
   enemyDamage: 30
